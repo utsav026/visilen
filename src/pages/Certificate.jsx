@@ -1,34 +1,65 @@
 /* ==============================
-   Certificate Verification Page – Verify certificate by ID
+   Certificate Verification Page – Real API integration with Google Apps Script
    ============================== */
 
 import { useState } from 'react';
 import { HiOutlineSearch, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
 import SectionWrapper from '../components/SectionWrapper';
 
+// ⚠️ REPLACE THIS with your Google Apps Script Web App URL (see setup-instructions.md Step 7)
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+
 function Certificate() {
     const [certId, setCertId] = useState('');
-    const [status, setStatus] = useState(null); // null | 'valid' | 'invalid'
+    const [status, setStatus] = useState(null); // null | 'valid' | 'invalid' | 'error'
+    const [certData, setCertData] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
 
-    // Placeholder verification (static mock)
-    const handleVerify = (e) => {
+    const handleVerify = async (e) => {
         e.preventDefault();
         if (!certId.trim()) return;
 
         setIsSearching(true);
         setStatus(null);
+        setCertData(null);
 
-        // Simulate verification delay
-        setTimeout(() => {
-            // Demo: IDs starting with "VIS-" are treated as valid
-            if (certId.toUpperCase().startsWith('VIS-')) {
-                setStatus('valid');
+        try {
+            // If Apps Script URL is not configured, use fallback demo mode
+            if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
+                // Demo mode — simulates API response
+                await new Promise((r) => setTimeout(r, 1500));
+                if (certId.toUpperCase().startsWith('VIS-')) {
+                    setStatus('valid');
+                    setCertData({
+                        id: certId.toUpperCase(),
+                        name: 'Demo Student',
+                        domain: 'Web Development',
+                        duration: '2 Months',
+                        status: 'Valid',
+                        issuedBy: 'VISILEN Technologies',
+                    });
+                } else {
+                    setStatus('invalid');
+                }
             } else {
-                setStatus('invalid');
+                // Real API call to Google Apps Script
+                const url = `${APPS_SCRIPT_URL}?id=${encodeURIComponent(certId.trim())}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.certificate) {
+                    setStatus('valid');
+                    setCertData(data.certificate);
+                } else {
+                    setStatus('invalid');
+                }
             }
+        } catch (err) {
+            console.error('Verification error:', err);
+            setStatus('error');
+        } finally {
             setIsSearching(false);
-        }, 1500);
+        }
     };
 
     return (
@@ -89,7 +120,7 @@ function Certificate() {
                     )}
 
                     {/* Valid Certificate Result */}
-                    {status === 'valid' && !isSearching && (
+                    {status === 'valid' && !isSearching && certData && (
                         <div className="glass-card p-8 md:p-10 border-green-500/20" data-aos="fade-up">
                             <div className="flex items-center gap-3 mb-6">
                                 <HiOutlineCheckCircle className="text-green-400" size={28} />
@@ -102,33 +133,33 @@ function Certificate() {
                                 <div className="grid sm:grid-cols-2 gap-6">
                                     <div>
                                         <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Certificate ID</p>
-                                        <p className="text-silver font-heading font-semibold">{certId.toUpperCase()}</p>
+                                        <p className="text-silver font-heading font-semibold">{certData.id}</p>
                                     </div>
                                     <div>
                                         <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Issued To</p>
-                                        <p className="text-silver font-heading font-semibold">John Doe</p>
+                                        <p className="text-silver font-heading font-semibold">{certData.name}</p>
                                     </div>
                                     <div>
                                         <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Program</p>
-                                        <p className="text-silver font-heading font-semibold">Web Development Internship</p>
+                                        <p className="text-silver font-heading font-semibold">{certData.domain}</p>
                                     </div>
                                     <div>
                                         <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Duration</p>
-                                        <p className="text-silver font-heading font-semibold">2 Months</p>
+                                        <p className="text-silver font-heading font-semibold">{certData.duration}</p>
                                     </div>
                                     <div>
-                                        <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Issue Date</p>
-                                        <p className="text-silver font-heading font-semibold">January 2025</p>
+                                        <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Issued By</p>
+                                        <p className="text-silver font-heading font-semibold">{certData.issuedBy}</p>
                                     </div>
                                     <div>
                                         <p className="text-silver/40 text-xs uppercase tracking-wider mb-1">Status</p>
-                                        <p className="text-green-400 font-heading font-semibold">Valid</p>
+                                        <p className="text-green-400 font-heading font-semibold">{certData.status}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <p className="text-silver/40 text-xs text-center">
-                                This is a placeholder verification. Actual certificate data will be connected in a future update.
+                                This certificate has been verified by VISILEN Technologies.
                             </p>
                         </div>
                     )}
@@ -154,6 +185,24 @@ function Certificate() {
                         </div>
                     )}
 
+                    {/* Error State */}
+                    {status === 'error' && !isSearching && (
+                        <div className="glass-card p-8 md:p-10 border-yellow-500/20" data-aos="fade-up">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-yellow-400 text-xl">⚠️</span>
+                                <span className="bg-yellow-500/10 text-yellow-400 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Connection Error
+                                </span>
+                            </div>
+                            <p className="text-silver/60 text-sm">
+                                Unable to verify at this time. Please try again later or contact us at{' '}
+                                <a href="mailto:contact@visilen.tech" className="text-cyan hover:underline">
+                                    contact@visilen.tech
+                                </a>
+                            </p>
+                        </div>
+                    )}
+
                     {/* Help Text */}
                     {!status && !isSearching && (
                         <div className="glass-card p-8 text-center" data-aos="fade-up" data-aos-delay="100">
@@ -162,7 +211,7 @@ function Certificate() {
                             </div>
                             <h3 className="font-heading text-lg font-semibold text-silver mb-2">How to Verify</h3>
                             <p className="text-silver/50 text-sm max-w-md mx-auto">
-                                Enter the certificate ID found on your VISILEN Technologies certificate. The ID typically starts with "VIS-" followed by the year and a unique number.
+                                Enter the certificate ID found on your VISILEN Technologies certificate. The ID starts with "VIS-" followed by the year and a unique number (e.g., VIS-2025-0001).
                             </p>
                         </div>
                     )}

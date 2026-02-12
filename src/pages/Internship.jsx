@@ -195,26 +195,45 @@ function Internship() {
                 </div>
             </SectionWrapper>
 
-            {/* ═══════════ APPLICATION FORM ═══════════ */}
+            {/* ═══════════ HOW TO APPLY ═══════════ */}
             <SectionWrapper bg="bg-midnight-light/30" id="apply">
-                <div className="max-w-3xl mx-auto text-center">
-                    <p data-aos="fade-up" className="text-cyan text-sm font-semibold uppercase tracking-widest mb-3">
-                        Apply Now
-                    </p>
-                    <h2 data-aos="fade-up" data-aos-delay="100" className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                        Start Your <span className="gradient-text">Application</span>
-                    </h2>
-                    <p data-aos="fade-up" data-aos-delay="200" className="text-silver/60 mb-10">
-                        Fill out the form below to apply for our internship program. Our team will review your application and get back to you within 48 hours.
-                    </p>
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-12">
+                        <p data-aos="fade-up" className="text-cyan text-sm font-semibold uppercase tracking-widest mb-3">
+                            Apply Now
+                        </p>
+                        <h2 data-aos="fade-up" data-aos-delay="100" className="font-heading text-3xl md:text-4xl font-bold mb-4">
+                            Start Your <span className="gradient-text">Application</span>
+                        </h2>
+                        <p data-aos="fade-up" data-aos-delay="200" className="text-silver/60 max-w-2xl mx-auto">
+                            Follow these simple steps to apply. Our team will verify your payment and send you project details within 48 hours.
+                        </p>
+                    </div>
 
-                    {/* Google Form Embed Placeholder */}
-                    <div data-aos="fade-up" data-aos-delay="300" className="glass-card p-8 md:p-12">
+                    {/* Payment Steps */}
+                    <div className="grid md:grid-cols-3 gap-6 mb-12">
+                        {[
+                            { step: '01', title: 'Fill the Form', desc: 'Fill out the application form below with your details and select your preferred domain.', icon: '📝' },
+                            { step: '02', title: 'Make Payment', desc: 'Pay via the QR code / UPI ID shown in the form and upload a screenshot of the payment.', icon: '💳' },
+                            { step: '03', title: 'Get Started', desc: 'We\'ll verify your payment and email you project details & GitHub instructions within 48 hours.', icon: '🚀' },
+                        ].map((item, i) => (
+                            <div key={item.step} data-aos="fade-up" data-aos-delay={i * 100} className="glass-card p-6 text-center">
+                                <span className="text-3xl mb-3 block">{item.icon}</span>
+                                <span className="text-cyan/40 text-xs font-semibold uppercase tracking-widest">Step {item.step}</span>
+                                <h3 className="font-heading text-lg font-bold text-silver mt-1 mb-2">{item.title}</h3>
+                                <p className="text-silver/50 text-sm">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Google Form Embed */}
+                    <div data-aos="fade-up" className="glass-card p-8 md:p-12">
+                        <h3 className="font-heading text-2xl font-bold text-silver mb-2 text-center">Application Form</h3>
+                        <p className="text-silver/50 text-sm text-center mb-8">Fill all fields and upload your payment screenshot</p>
                         <div className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center">
                             <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
                                 <span className="text-3xl">📝</span>
                             </div>
-                            <h3 className="font-heading text-lg font-semibold text-silver mb-2">Application Form</h3>
                             <p className="text-silver/50 text-sm mb-4">
                                 Google Form will be embedded here.
                             </p>
@@ -222,13 +241,14 @@ function Internship() {
                                 Replace this placeholder with your Google Form iframe embed code.
                             </p>
                             {/* 
-                INSTRUCTIONS: Replace the placeholder above with:
+                INSTRUCTIONS: Replace the div above with:
                 <iframe 
                   src="YOUR_GOOGLE_FORM_URL" 
                   width="100%" 
-                  height="800" 
+                  height="900" 
                   frameBorder="0" 
                   title="Internship Application"
+                  className="rounded-xl"
                 >
                   Loading…
                 </iframe>
